@@ -3,49 +3,49 @@
 #include <string.h>
 #include <time.h>
 
-int board[4][4];
+int board[16];
 
-int* getEmptyTiles(int* count){
-    int* emptyTiles = calloc(17, sizeof(int));
+int *getEmptyTiles(int *count) {
+    int *emptyTiles = calloc(16, sizeof(int));
     *count = 0;
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            if(board[i][j] == 0){
-                emptyTiles[(*count)++] = i * 4 + j;
-            }
-        } 
-    }  
+    for (int i = 0; i < 16; i++) {
+        if (board[i] == 0) {
+            emptyTiles[(*count)++] = i;
+        }
+    }
     return emptyTiles;
 }
 
-void newTile(){
-    int tileVal = ( rand() % 2 + 1 ) * 2;
-    int count; 
-    int* emptyTiles = getEmptyTiles(&count);
+void newTile() {
+    int tileVal = (rand() % 2 + 1) * 2;
+    int count;
+    int *emptyTiles = getEmptyTiles(&count);
     int tileNum = emptyTiles[rand() % count];
     int j = tileNum % 4;
-    board[(tileNum - j)/4][j] = tileVal;
+    board[tileNum] = tileVal;
 }
 
+void isMoveValid(int tilenum, int direction) {}
+
+void move(int direction) {}
+
 void display() {
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            printf("%d ", board[i][j] ); 
+    for (int i = 0; i < 16; i++) {
+        printf("%d ", board[i]);
+        if (i % 4 == 3) {
+            printf("\n");
         }
-        printf("\n"); 
     }
 }
 
-void newGame(){
+void newGame() {
     memset(board, 0, sizeof(board));
     newTile();
     newTile();
     display();
 }
 
-
-
-int main(){
+int main() {
     // srand(time(NULL));
-    newGame(); 
+    newGame();
 }
