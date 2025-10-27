@@ -53,3 +53,7 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+
+# main executable
+2048

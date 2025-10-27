@@ -5,7 +5,6 @@ OBJS = $(SRCS:.c=.o)
 all: game
 
 game: $(OBJS)
-	$(CC) $(OBJS) -o game
-
+	$(CC) $(OBJS) -o 2048 
 clean:
-	rm -f $(OBJS) game
+	rm -f $(OBJS) 2048 
