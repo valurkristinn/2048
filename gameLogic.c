@@ -1,10 +1,10 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
 int board[16];
-int hasMerged[16];
 
 enum Direction { UP = -4, DOWN = 4, LEFT = -1, RIGHT = 1 };
 
@@ -65,7 +65,7 @@ int getMoveValidity(int tilenum, enum Direction direction) {
     return 0;
 }
 
-void move(int tileNum, enum Direction direction) {
+void moveTile(int tileNum, enum Direction direction, int hasMerged[]) {
     if (board[tileNum] == 0) {
         return;
     }
@@ -87,11 +87,29 @@ void move(int tileNum, enum Direction direction) {
         hasMerged[nextTileNum] = 1;
     }
 
-
-    move(nextTileNum, direction);
+    moveTile(nextTileNum, direction, hasMerged);
 }
 
-void doRound() {}
+void moveAll(enum Direction direction) {
+    int hasMerged[16];
+    memset(hasMerged, 0, sizeof(hasMerged));
+
+    // up&left 0 0 + +
+    // down&right 3 3 - -
+
+    int start = 0;
+    int step = 1;
+    if (direction == DOWN || direction == RIGHT) {
+        start = 3;
+        step = -1;
+    }
+
+    for (int i = start; step > 0 ? i <= 3 : i >= 0; i += step) {
+        for (int j = start; step > 0 ? j <= 3 : j >= 0; j += step) {
+            moveTile(i * 4 + j, direction, hasMerged);
+        }
+    }
+}
 
 void display() {
     // for (int i = 0; i < 99; i++) {
@@ -108,14 +126,10 @@ void display() {
 
 void newGame() {
     memset(board, 0, sizeof(board));
-    // newTile();
-    // newTile();
-    board[0] = 2;
-    board[4] = 2;
-    board[8] = 4;
+    newTile();
+    newTile();
     display();
-    move(4, UP);
-    move(8, UP);
+    moveAll(DOWN);
     display();
 }
 
