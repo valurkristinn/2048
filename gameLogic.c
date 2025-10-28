@@ -1,15 +1,14 @@
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
 int board[16];
+int emptyTiles[16];
 
 enum Direction { UP = -4, DOWN = 4, LEFT = -1, RIGHT = 1 };
 
-int *getEmptyTiles(int *count) {
-    int *emptyTiles = calloc(16, sizeof(int));
+void *getEmptyTiles(int *count) {
     *count = 0;
     for (int i = 0; i < 16; i++) {
         if (board[i] == 0) {
@@ -19,10 +18,8 @@ int *getEmptyTiles(int *count) {
     return emptyTiles;
 }
 
-void newTile() {
+void newTile(int count) {
     int tileVal = (rand() % 2 + 1) * 2;
-    int count;
-    int *emptyTiles = getEmptyTiles(&count);
     int tileNum = emptyTiles[rand() % count];
     board[tileNum] = tileVal;
 }
@@ -65,16 +62,16 @@ int getMoveValidity(int tilenum, enum Direction direction) {
     return 0;
 }
 
-void moveTile(int tileNum, enum Direction direction, int hasMerged[]) {
+int moveTile(int tileNum, enum Direction direction, int hasMerged[]) {
     if (board[tileNum] == 0) {
-        return;
+        return 0;
     }
 
     int validity = getMoveValidity(tileNum, direction);
     int nextTileNum = tileNum + direction;
 
     if (!validity || hasMerged[nextTileNum] || hasMerged[tileNum]) {
-        return;
+        return 0;
     }
 
     board[nextTileNum] = board[tileNum] * validity;
@@ -88,11 +85,13 @@ void moveTile(int tileNum, enum Direction direction, int hasMerged[]) {
     }
 
     moveTile(nextTileNum, direction, hasMerged);
+    return 1;
 }
 
-void moveAll(enum Direction direction) {
+int moveAll(enum Direction direction) {
     int hasMerged[16];
     memset(hasMerged, 0, sizeof(hasMerged));
+    int hasMoved = 0;
 
     // up&left 0 0 + +
     // down&right 3 3 - -
@@ -106,9 +105,27 @@ void moveAll(enum Direction direction) {
 
     for (int i = start; step > 0 ? i <= 3 : i >= 0; i += step) {
         for (int j = start; step > 0 ? j <= 3 : j >= 0; j += step) {
-            moveTile(i * 4 + j, direction, hasMerged);
+            if (moveTile(i * 4 + j, direction, hasMerged)) {
+                hasMoved = 1;
+            }
         }
     }
+    return hasMoved;
+}
+
+int isGameOver() {
+    enum Direction directions[4] = {UP, DOWN, LEFT, RIGHT};
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = i % 2 == 0 ? 0 : 1; j < 4; j += 2) {
+            for (int k = 0; k < 4; k++) {
+                if (getMoveValidity(i * 4 + j, directions[k])) {
+                    return 0;
+                }
+            }
+        }
+    }
+    return 1;
 }
 
 void display() {
@@ -124,12 +141,44 @@ void display() {
     printf("\n");
 }
 
+enum Direction getInput() {
+    char c = getchar();
+    while (1) {
+        switch (c) {
+        case 'w':
+            return UP;
+        case 's':
+            return DOWN;
+        case 'a':
+            return LEFT;
+        case 'd':
+            return RIGHT;
+        default:
+            c = getchar();
+        }
+    }
+}
+
 void newGame() {
     memset(board, 0, sizeof(board));
-    newTile();
-    newTile();
-    display();
-    moveAll(DOWN);
+    int count;
+    int loop = 1;
+
+
+    getEmptyTiles(&count);
+    newTile(count);
+    getEmptyTiles(&count);
+    newTile(count);
+
+    while (!(count == 1 && isGameOver())) {
+        display();
+
+        while (!moveAll(getInput())) {
+            printf("invalid move, try again");
+        }
+        getEmptyTiles(&count);
+        newTile(count);
+    }
     display();
 }
 
