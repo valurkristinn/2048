@@ -1,5 +1,5 @@
 CFLAGS = -g
-SRCS = gameLogic.c
+SRCS = gamelogic.c main.c
 OBJS = $(SRCS:.c=.o)
 
 all: game

@@ -1,26 +1,29 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-int board[16];
+#include "gameLogic.h"
+
+int *board;
 int emptyTiles[16];
+int *count;
 
 enum Direction { UP = -4, DOWN = 4, LEFT = -1, RIGHT = 1 };
 
-void *getEmptyTiles(int *count) {
+void getEmptyTiles() {
     *count = 0;
     for (int i = 0; i < 16; i++) {
         if (board[i] == 0) {
             emptyTiles[(*count)++] = i;
         }
     }
-    return emptyTiles;
 }
 
-void newTile(int count) {
+void newTile() {
     int tileVal = (rand() % 2 + 1) * 2;
-    int tileNum = emptyTiles[rand() % count];
+    int tileNum = emptyTiles[rand() % *count];
     board[tileNum] = tileVal;
 }
 
@@ -128,19 +131,6 @@ int isGameOver() {
     return 1;
 }
 
-void display() {
-    // for (int i = 0; i < 99; i++) {
-    //     printf("\n");
-    // }
-    for (int i = 0; i < 16; i++) {
-        printf("%d ", board[i]);
-        if (i % 4 == 3) {
-            printf("\n");
-        }
-    }
-    printf("\n");
-}
-
 enum Direction getInput() {
     char c = getchar();
     while (1) {
@@ -159,30 +149,31 @@ enum Direction getInput() {
     }
 }
 
-void newGame() {
-    memset(board, 0, sizeof(board));
-    int count;
-    int loop = 1;
-
-
-    getEmptyTiles(&count);
-    newTile(count);
-    getEmptyTiles(&count);
-    newTile(count);
-
-    while (!(count == 1 && isGameOver())) {
-        display();
-
-        while (!moveAll(getInput())) {
-            printf("invalid move, try again");
-        }
-        getEmptyTiles(&count);
-        newTile(count);
-    }
-    display();
+int *init() {
+    board = calloc(16, sizeof(int));
+    count = malloc(sizeof(int));
+    return board;
 }
 
-int main() {
-    // srand(time(NULL));
-    newGame();
+void startNewGame() {
+    memset(board, 0, sizeof(*board));
+
+    getEmptyTiles();
+    newTile();
+    getEmptyTiles();
+    newTile();
+}
+
+int performRound() {
+    if (*count == 1 && isGameOver()) {
+        return 0;
+    }
+
+    while (!moveAll(getInput())) {
+        printf("invalid move, try again");
+    }
+
+    getEmptyTiles();
+    newTile();
+    return 1;
 }
