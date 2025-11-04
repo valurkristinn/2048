@@ -2,9 +2,10 @@
 #define GAMELOGIC_H
 
 extern int *board;
+extern int *hasMerged;
 
-int *init();
+void initGame();
 void startNewGame();
-int performRound();
+int performRound(int dir);
 
 #endif

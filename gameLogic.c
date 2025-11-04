@@ -6,11 +6,12 @@
 
 #include "gameLogic.h"
 
+enum Direction { UP = -4, DOWN = 4, LEFT = -1, RIGHT = 1 };
+
 int *board;
 int emptyTiles[16];
+int *hasMerged;
 int *count;
-
-enum Direction { UP = -4, DOWN = 4, LEFT = -1, RIGHT = 1 };
 
 void getEmptyTiles() {
     *count = 0;
@@ -65,7 +66,7 @@ int getMoveValidity(int tilenum, enum Direction direction) {
     return 0;
 }
 
-int moveTile(int tileNum, enum Direction direction, int hasMerged[]) {
+int moveTile(int tileNum, enum Direction direction) {
     if (board[tileNum] == 0) {
         return 0;
     }
@@ -87,13 +88,12 @@ int moveTile(int tileNum, enum Direction direction, int hasMerged[]) {
         hasMerged[nextTileNum] = 1;
     }
 
-    moveTile(nextTileNum, direction, hasMerged);
+    moveTile(nextTileNum, direction);
     return 1;
 }
 
 int moveAll(enum Direction direction) {
-    int hasMerged[16];
-    memset(hasMerged, 0, sizeof(hasMerged));
+    memset(hasMerged, 0, 16*sizeof(int));
     int hasMoved = 0;
 
     // up&left 0 0 + +
@@ -108,7 +108,7 @@ int moveAll(enum Direction direction) {
 
     for (int i = start; step > 0 ? i <= 3 : i >= 0; i += step) {
         for (int j = start; step > 0 ? j <= 3 : j >= 0; j += step) {
-            if (moveTile(i * 4 + j, direction, hasMerged)) {
+            if (moveTile(i * 4 + j, direction)) {
                 hasMoved = 1;
             }
         }
@@ -131,28 +131,25 @@ int isGameOver() {
     return 1;
 }
 
-enum Direction getInput() {
-    char c = getchar();
-    while (1) {
-        switch (c) {
-        case 'w':
-            return UP;
-        case 's':
-            return DOWN;
-        case 'a':
-            return LEFT;
-        case 'd':
-            return RIGHT;
-        default:
-            c = getchar();
-        }
+enum Direction intToDir(int i) {
+    switch (i) {
+    case -4:
+        return UP;
+    case 4:
+        return DOWN;
+    case -1:
+        return LEFT;
+    case 1:
+        return RIGHT;
+    default:
+        return 0;
     }
 }
 
-int *init() {
+void initGame(){
     board = calloc(16, sizeof(int));
+    hasMerged = calloc(16, sizeof(int));
     count = malloc(sizeof(int));
-    return board;
 }
 
 void startNewGame() {
@@ -164,13 +161,12 @@ void startNewGame() {
     newTile();
 }
 
-int performRound() {
+int performRound(int dir) {
     if (*count == 1 && isGameOver()) {
         return 0;
     }
-
-    while (!moveAll(getInput())) {
-        printf("invalid move, try again");
+    if (!moveAll(intToDir(dir))) {
+        return 2;
     }
 
     getEmptyTiles();

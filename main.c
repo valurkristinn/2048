@@ -1,24 +1,20 @@
-#include <stdio.h>
 #include "gameLogic.h"
+#include "ui.h"
+#include <stdio.h>
 
 void display() {
-    // for (int i = 0; i < 99; i++) {
-    //     printf("\n");
-    // }
-    for (int i = 0; i < 16; i++) {
-        printf("%d ", board[i]);
-        if (i % 4 == 3) {
-            printf("\n");
-        }
-    }
-    printf("\n");
+    drawNumbers(board);
+    // animateTiles(hasMerged);
 }
 
 int main() {
-    init();
+    initGame();
+    initInterface();
+    drawTiles();
     startNewGame();
     do {
         display();
-    } while (performRound());
+    } while (performRound(getInput()));
     display();
+    closeInterface();
 }
