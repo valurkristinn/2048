@@ -8,5 +8,6 @@ void drawNumbers(int board[]);
 int getInput();
 void closeInterface();
 void animateTiles(int hasMerged[]);
+void testing();
 
 #endif

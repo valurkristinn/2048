@@ -4,7 +4,8 @@
 
 void display() {
     drawNumbers(board);
-    // animateTiles(hasMerged);
+    testing();
+    animateTiles(hasMerged);
 }
 
 int main() {

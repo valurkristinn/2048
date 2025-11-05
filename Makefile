@@ -1,4 +1,4 @@
-CFLAGS = -g
+CFLAGS = -g 
 LDFLAGS = -lncurses
 SRCS = main.c gameLogic.c ui.c
 OBJS = $(SRCS:.c=.o)

@@ -1,12 +1,12 @@
+#define _XOPEN_SOURCE_EXTENDED
 #include <locale.h>
 #include <ncurses.h>
 #include <stdio.h>
 #include <string.h>
-#include <wchar.h>
 #include <unistd.h>
+#include <wchar.h>
 
 #include "ui.h"
-#include "gameLogic.h"
 
 enum Direction { UP = -4, DOWN = 4, LEFT = -1, RIGHT = 1 };
 
@@ -38,6 +38,28 @@ void initInterface() {
     mainWidth = tileWidth * 4 + 7;
     mainHeight = tileHeight * 4 + 2;
     getMargin();
+
+    start_color();
+
+    init_pair(1, 59, 250);
+    init_pair(2, 59, 255);
+    init_pair(3, 59, 253);
+    init_pair(4, 231, 208);
+    init_pair(5, 231, 202);
+    init_pair(6, 231, 196);
+    init_pair(7, 231, 160);
+    init_pair(8, 231, 220);
+    init_pair(9, 231, 214);
+    init_pair(10, 231, 208);
+    init_pair(11, 231, 202);
+    init_pair(12, 231, 196);
+    init_pair(13, 16, 226);
+    init_pair(14, 16, 220);
+    init_pair(15, 16, 214);
+    init_pair(16, 231, 93);
+    init_pair(17, 231, 27);
+
+    init_pair(18, COLOR_BLACK, COLOR_WHITE);
 }
 
 void getMargin() {
@@ -46,6 +68,12 @@ void getMargin() {
 }
 
 void closeInterface() { endwin(); }
+
+int get_color_pair(int value) {
+    if (value == 0)
+        return 1;
+    return (value <= 65536) ? (__builtin_ctz(value) + 1) : 17;
+}
 
 void drawBox(int x, int y, int width, int height) {
     mvhline(y, x + 1, ACS_HLINE, width - 2);
@@ -56,6 +84,38 @@ void drawBox(int x, int y, int width, int height) {
     mvaddch(y, x + width - 1, ACS_URCORNER);
     mvaddch(y + height - 1, x, ACS_LLCORNER);
     mvaddch(y + height - 1, x + width - 1, ACS_LRCORNER);
+}
+
+// void drawBoxThick(int x, int y, int width, int height) {
+//     wchar_t upperLine[tileWidth*4];
+//     wmemset(upperLine, L'\u2580', width - 2);
+//     upperLine[width - 2] = L'\0';
+//     mvaddwstr(y, x + 1, upperLine);
+//
+//     wchar_t lowerLine[256];
+//     wmemset(lowerLine, L'\u2584', width - 2);
+//     lowerLine[width - 2] = L'\0';
+//     mvaddwstr(y + height - 1, x + 1, lowerLine);
+//
+//     wchar_t column[256];
+//     wmemset(column,' ',)
+//
+//     for (int i = 0; i < height; i++) {
+//         mvaddwstr(y + i, x, "█");
+//     }
+// }
+
+// nota frekar bara background color
+void drawBoxThick(int x, int y, int width, int height) {
+    wattron(stdscr, COLOR_PAIR(18));
+    mvhline(y, x, ' ', width);
+    mvhline(y + height - 1, x, ' ', width);
+    mvvline(y + 1, x, ' ', height - 2);
+    mvvline(y + 1, x + width - 1, ' ', height - 2);
+
+    // mvvline(y + 1, x + 1, ' ', height - 2);
+    // mvvline(y + 1, x + width - 2, ' ', height - 2);
+    wattroff(stdscr, COLOR_PAIR(18));
 }
 
 int getXofTile(int tileNum) {
@@ -118,38 +178,39 @@ void drawNumbers(int board[]) {
 void eraseBetweenTiles() {
     for (int i = 1; i < mainHeight; i++) {
         for (int j = 0; j < 6; j++) {
-            mvaddch(yMargin + i, xMargin + 1 + j * (tileWidth + 1),' ');
+            mvaddch(yMargin + i, xMargin + 1 + j * (tileWidth + 1), ' ');
         }
     }
 }
 
 void eraseBorder(int x, int y, int width, int height) {
     for (int i = 0; i < width; i++) {
-        mvaddch(y, x + i,' ');
-        mvaddch(y + height - 1, x + i,' ');
+        mvaddch(y, x + i, ' ');
+        mvaddch(y + height - 1, x + i, ' ');
     }
     for (int j = 1; j < height - 1; j++) {
-        mvaddch(y + j, x,' ');
-        mvaddch(y + j, x + width - 1,' ');
+        mvaddch(y + j, x, ' ');
+        mvaddch(y + j, x + width - 1, ' ');
     }
 }
 
-void animateTile(int tileNum){
-    int x = getXofTile(tileNum);
-    int y = getYofTile(tileNum);
-    eraseBorder(x, y,tileWidth, tileHeight);
-    drawBox(x-2,y-2, tileWidth+2, tileHeight+2);
-    usleep(1000*100);
-    eraseBetweenTiles();
-    drawTiles();
-}
 
-void animateTiles(int hasMerged[]){
-    for (int i = 0; i<16; i++) {
+
+void animateTiles(int hasMerged[]) {
+    for (int i = 0; i < 16; i++) {
         if (hasMerged[i]) {
-            animateTile(i);
+            drawBoxThick(getXofTile(i), getYofTile(i), tileWidth, tileHeight);
         }
     }
+    refresh();
+    usleep(1500 * 100);
+
+    for (int i = 0; i < 16; i++) {
+        if (hasMerged[i]) {
+            drawBox(getXofTile(i), getYofTile(i), tileWidth, tileHeight);
+         }
+    }
+    
 }
 
 int getInput() {
@@ -178,4 +239,7 @@ int getInput() {
             break;
         }
     }
+}
+
+void testing() {
 }
