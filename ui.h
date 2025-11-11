@@ -3,11 +3,10 @@
 
 void initInterface();
 void getMargin();
-void drawTiles();
-void drawNumbers(int board[]);
 int getInput();
 void closeInterface();
-void animateTiles(int hasMerged[]);
 void testing();
+void refreshTiles(int board[], int hasMerged[]);
+void draw_game_over_overlay();
 
 #endif

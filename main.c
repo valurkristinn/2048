@@ -2,20 +2,18 @@
 #include "ui.h"
 #include <stdio.h>
 
-void display() {
-    drawNumbers(board);
-    testing();
-    animateTiles(hasMerged);
-}
+void display() { refreshTiles(board, hasMerged); }
 
 int main() {
     initGame();
     initInterface();
-    drawTiles();
     startNewGame();
+    display();
     do {
         display();
     } while (performRound(getInput()));
     display();
+    draw_game_over_overlay();
+    testing();
     closeInterface();
 }

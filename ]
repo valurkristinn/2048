@@ -1,9 +1,5 @@
-#define _XOPEN_SOURCE_EXTENDED
 #include <locale.h>
-#include <ncursesw/curses.h>
-#include <stdlib.h>
-#include <wchar.h>
-// #include <ncurses.h>
+#include <ncrusesw/curses.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -90,23 +86,36 @@ void drawBox(int x, int y, int width, int height) {
     mvaddch(y + height - 1, x + width - 1, ACS_LRCORNER);
 }
 
+// void drawBoxThick(int x, int y, int width, int height) {
+//     wchar_t upperLine[tileWidth*4];
+//     wmemset(upperLine, L'\u2580', width - 2);
+//     upperLine[width - 2] = L'\0';
+//     mvaddwstr(y, x + 1, upperLine);
+//
+//     wchar_t lowerLine[256];
+//     wmemset(lowerLine, L'\u2584', width - 2);
+//     lowerLine[width - 2] = L'\0';
+//     mvaddwstr(y + height - 1, x + 1, lowerLine);
+//
+//     wchar_t column[256];
+//     wmemset(column,' ',)
+//
+//     for (int i = 0; i < height; i++) {
+//         mvaddwstr(y + i, x, "█");
+//     }
+// }
+
+// nota frekar bara background color
 void drawBoxThick(int x, int y, int width, int height) {
-    wchar_t topLine[4 * (width - 1)];
-    wmemset(topLine, L'\u2580', width - 2);
-    topLine[width - 2] = L'\0';
-    mvaddwstr(y, x + 1, topLine);
+    wattron(stdscr, COLOR_PAIR(18));
+    mvhline(y, x, ' ', width);
+    mvhline(y + height - 1, x, ' ', width);
+    mvvline(y + 1, x, ' ', height - 2);
+    mvvline(y + 1, x + width - 1, ' ', height - 2);
 
-    wchar_t bottomLine[4 * (width - 1)];
-    wmemset(bottomLine, L'\u2584', width - 2);
-    bottomLine[width - 2] = L'\0';
-    mvaddwstr(y + height - 1, x + 1, bottomLine);
-
-    wchar_t block[] = L"\u2588";
-
-    for (int i = 0; i < height; i++) {
-        mvaddwstr(y + i, x, block);
-        mvaddwstr(y + i, x + width - 1, block);
-    }
+    // mvvline(y + 1, x + 1, ' ', height - 2);
+    // mvvline(y + 1, x + width - 2, ' ', height - 2);
+    wattroff(stdscr, COLOR_PAIR(18));
 }
 
 int getXofTile(int tileNum) {
@@ -152,11 +161,9 @@ int countDecimals(int n) {
 void drawNumbers(int board[]) {
     for (int i = 0; i < 16; i++) {
         int val = board[i];
-        // for (int j = 1; j < tileWidth - 2; j++) {
-        //     mvaddch(, , ' ');
-        // }
-        mvhline(getYofTile(i) + (tileHeight / 2), getXofTile(i) + 1, ' ',
-                tileWidth - 4);
+        for (int j = 1; j < tileWidth - 2; j++) {
+            mvaddch(getYofTile(i) + (tileHeight / 2), getXofTile(i) + j, ' ');
+        }
 
         if (val != 0) {
             int decimals = countDecimals(val);
@@ -243,57 +250,46 @@ void refreshTiles(int board[], int hasMerged[]) {
 }
 
 void testing() {
-    usleep(1000 * 1000);
+    usleep(1000*1000);
     flushinp();
     getch();
 }
 
+
 void draw_game_over_overlay() {
-    const char *ascii_art[] = {" ██████╗  █████╗ ███╗   ███╗███████╗      "
-                               "██████╗ ██╗   ██╗███████╗██████╗ ",
-                               "██╔════╝ ██╔══██╗████╗ ████║██╔════╝     "
-                               "██╔═══██╗██║   ██║██╔════╝██╔══██╗",
-                               "██║  ███╗███████║██╔████╔██║█████╗       ██║   "
-                               "██║██║   ██║█████╗  ██████╔╝",
-                               "██║   ██║██╔══██║██║╚██╔╝██║██╔══╝       ██║   "
-                               "██║╚██╗ ██╔╝██╔══╝  ██╔══██╗",
-                               "╚██████╔╝██║  ██║██║ ╚═╝ ██║███████╗     "
-                               "╚██████╔╝ ╚████╔╝ ███████╗██║  ██║",
-                               " ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝      "
-                               "╚═════╝   ╚═══╝  ╚══════╝╚═╝  ╚═╝"};
-
+    const char *ascii_art[] = {
+    " ██████╗  █████╗ ███╗   ███╗███████╗     ██████╗ ██╗   ██╗███████╗██████╗ ",
+    "██╔════╝ ██╔══██╗████╗ ████║██╔════╝    ██╔═══██╗██║   ██║██╔════╝██╔══██╗",
+    "██║  ███╗███████║██╔████╔██║█████╗      ██║   ██║██║   ██║█████╗  ██████╔╝",
+    "██║   ██║██╔══██║██║╚██╔╝██║██╔══╝      ██║   ██║╚██╗ ██╔╝██╔══╝  ██╔══██╗",
+    "╚██████╔╝██║  ██║██║ ╚═╝ ██║███████╗    ╚██████╔╝ ╚████╔╝ ███████╗██║  ██║",
+    " ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝     ╚═════╝   ╚═══╝  ╚══════╝╚═╝  ╚═╝"
+};
+    
     int num_lines = 6;
-    int max_width = 75;
-
-    int start_y = (yMax - num_lines) / 2;
-    int start_x = (xMax - max_width) / 2;
-
-    wchar_t w_line_buf[max_width + 1];
-
+    int max_width = strlen(ascii_art[0]);
+    int win_height, win_width;
+    getmaxyx(stdscr, win_height, win_width);
+    
+    int start_y = (win_height - num_lines) / 2;
+    int start_x = (win_width - max_width) / 2;
+    
     for (int i = 0; i < num_lines; i++) {
         int y = start_y + i;
-        if (y < 0 || y >= yMax)
-            continue;
-
+        if (y < 0 || y >= win_height) continue;
+        
         const char *line = ascii_art[i];
-
-        mbstowcs(w_line_buf, line, max_width + 1);
-
-        size_t wide_len = wcslen(w_line_buf);
-
-        for (int j = 0; j < wide_len; j++) {
+        int len = strlen(line);
+        
+        for (int j = 0; j < len; j++) {
             int x = start_x + j;
-            if (x < 0 || x >= xMax)
-                continue;
-
-            if (w_line_buf[j] != L' ') {
-                cchar_t char_to_add;
-                setcchar(&char_to_add, &w_line_buf[j], 0, 0, NULL);
-
-                mvadd_wch(y, x, &char_to_add);
+            if (x < 0 || x >= win_width) continue;
+            
+            if (line[j] != ' ') {
+                mvaddwch(y, x, line[j]);
             }
         }
     }
-
+    
     refresh();
 }

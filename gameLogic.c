@@ -93,7 +93,7 @@ int moveTile(int tileNum, enum Direction direction) {
 }
 
 int moveAll(enum Direction direction) {
-    memset(hasMerged, 0, 16*sizeof(int));
+    memset(hasMerged, 0, 16 * sizeof(int));
     int hasMoved = 0;
 
     // up&left 0 0 + +
@@ -146,7 +146,7 @@ enum Direction intToDir(int i) {
     }
 }
 
-void initGame(){
+void initGame() {
     board = calloc(16, sizeof(int));
     hasMerged = calloc(16, sizeof(int));
     count = malloc(sizeof(int));
