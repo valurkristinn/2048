@@ -1,4 +1,4 @@
-CFLAGS = -g -I/opt/homebrew/opt/ncurses/include
+CFLAGS = -g -I/opt/homebrew/opt/ncurses/include -D_XOPEN_SOURCE_EXTENDED
 LDFLAGS = -L/opt/homebrew/opt/ncurses/lib -lncursesw
 SRCS = main.c gameLogic.c ui.c
 OBJS = $(SRCS:.c=.o)

@@ -11,20 +11,22 @@ enum Direction { UP = -4, DOWN = 4, LEFT = -1, RIGHT = 1 };
 int *board;
 int emptyTiles[16];
 int *hasMerged;
-int *count;
+int count;
+int score;
+
 
 void getEmptyTiles() {
-    *count = 0;
+    count = 0;
     for (int i = 0; i < 16; i++) {
         if (board[i] == 0) {
-            emptyTiles[(*count)++] = i;
+            emptyTiles[(count)++] = i;
         }
     }
 }
 
 void newTile() {
     int tileVal = (rand() % 2 + 1) * 2;
-    int tileNum = emptyTiles[rand() % *count];
+    int tileNum = emptyTiles[rand() % count];
     board[tileNum] = tileVal;
 }
 
@@ -86,6 +88,7 @@ int moveTile(int tileNum, enum Direction direction) {
 
     if (validity == 2) {
         hasMerged[nextTileNum] = 1;
+        score+=board[nextTileNum];
     }
 
     moveTile(nextTileNum, direction);
@@ -149,7 +152,7 @@ enum Direction intToDir(int i) {
 void initGame() {
     board = calloc(16, sizeof(int));
     hasMerged = calloc(16, sizeof(int));
-    count = malloc(sizeof(int));
+    count = 0;
 }
 
 void startNewGame() {
@@ -162,7 +165,7 @@ void startNewGame() {
 }
 
 int performRound(int dir) {
-    if (*count == 1 && isGameOver()) {
+    if (count == 1 && isGameOver()) {
         return 0;
     }
     if (!moveAll(intToDir(dir))) {

@@ -8,6 +8,7 @@ int main() {
     initGame();
     initInterface();
     startNewGame();
+    testing();
     display();
     do {
         display();

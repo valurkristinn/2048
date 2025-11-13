@@ -1,10 +1,7 @@
-#define _XOPEN_SOURCE_EXTENDED
+#include <curses.h>
 #include <locale.h>
-#include <ncursesw/curses.h>
-#include <stdlib.h>
-#include <wchar.h>
-// #include <ncurses.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <wchar.h>
@@ -62,7 +59,6 @@ void initInterface() {
     init_pair(15, 160, COLOR_BLACK); // 16384 - red-orange
     init_pair(16, 154, COLOR_BLACK); // 32768 - darker red-orange
     init_pair(17, 148, COLOR_BLACK); // 65536 - even darke
-
     init_pair(18, COLOR_BLACK, COLOR_WHITE);
 }
 
@@ -242,12 +238,6 @@ void refreshTiles(int board[], int hasMerged[]) {
     refresh();
 }
 
-void testing() {
-    usleep(1000 * 1000);
-    flushinp();
-    getch();
-}
-
 void draw_game_over_overlay() {
     const char *ascii_art[] = {" ██████╗  █████╗ ███╗   ███╗███████╗      "
                                "██████╗ ██╗   ██╗███████╗██████╗ ",
@@ -296,4 +286,37 @@ void draw_game_over_overlay() {
     }
 
     refresh();
+}
+
+void initGameOverlay() {
+    int x = xMargin;
+    int y = yMargin + mainHeight;
+    cchar_t arrow_up, arrow_down, arrow_left, arrow_right;
+
+    setcchar(&arrow_up, L"\u2191", 0, 0, NULL);
+    setcchar(&arrow_down, L"\u2193", 0, 0, NULL);
+    setcchar(&arrow_left, L"\u2190", 0, 0, NULL);
+    setcchar(&arrow_right, L"\u2192", 0, 0, NULL);
+
+    drawBox(x, y, mainWidth, 5);
+
+    mvprintw(y + 1, x + 2, "quit:    q");
+    mvprintw(y + 3, x + 2, "restart: r");
+    mvprintw(y + 1, x + 15, "score:");
+
+    mvadd_wch(y + 1, x + mainWidth - 5, &arrow_up);
+    mvadd_wch(y + 2, x + mainWidth - 7, &arrow_left);
+    mvadd_wch(y + 2, x + mainWidth - 3, &arrow_right);
+    mvadd_wch(y + 3, x + mainWidth - 5, &arrow_down);
+
+    refresh();
+}
+
+void gameInfoOverlay(int score, int input) {}
+
+void testing() {
+    initGameOverlay();
+    usleep(1000 * 1000);
+    flushinp();
+    getch();
 }
