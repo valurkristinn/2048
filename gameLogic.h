@@ -3,6 +3,7 @@
 
 extern int *board;
 extern int *hasMerged;
+extern int score;
 
 void initGame();
 void startNewGame();

@@ -136,13 +136,13 @@ int isGameOver() {
 
 enum Direction intToDir(int i) {
     switch (i) {
-    case -4:
+    case 0:
         return UP;
-    case 4:
-        return DOWN;
-    case -1:
-        return LEFT;
     case 1:
+        return DOWN;
+    case 2:
+        return LEFT;
+    case 3:
         return RIGHT;
     default:
         return 0;
@@ -156,7 +156,9 @@ void initGame() {
 }
 
 void startNewGame() {
-    memset(board, 0, sizeof(*board));
+    memset(board, 0, 16 * sizeof(int));
+    memset(hasMerged, 0, 16 * sizeof(int));
+    score = 0;
 
     getEmptyTiles();
     newTile();
@@ -164,11 +166,12 @@ void startNewGame() {
     newTile();
 }
 
-int performRound(int dir) {
+int performRound(int inp) {
     if (count == 1 && isGameOver()) {
         return 0;
     }
-    if (!moveAll(intToDir(dir))) {
+
+    if (!moveAll(intToDir(inp))) {
         return 2;
     }
 

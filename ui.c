@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <wchar.h>
 
+#include "gameLogic.h"
 #include "ui.h"
 
 enum Direction { UP = -4, DOWN = 4, LEFT = -1, RIGHT = 1 };
@@ -18,6 +19,11 @@ int xMargin;
 int yMargin;
 int tileWidth;
 int tileHeight;
+
+void getMargin() {
+    xMargin = (xMax - mainWidth) / 2;
+    yMargin = (yMax - mainHeight) / 2;
+}
 
 void initInterface() {
     setlocale(LC_ALL, "");
@@ -62,19 +68,6 @@ void initInterface() {
     init_pair(18, COLOR_BLACK, COLOR_WHITE);
 }
 
-void getMargin() {
-    xMargin = (xMax - mainWidth) / 2;
-    yMargin = (yMax - mainHeight) / 2;
-}
-
-void closeInterface() { endwin(); }
-
-int get_color_pair(int value) {
-    if (value == 0)
-        return 1;
-    return (value <= 65536) ? (__builtin_ctz(value) + 1) : 17;
-}
-
 void drawBox(int x, int y, int width, int height) {
     mvhline(y, x + 1, ACS_HLINE, width - 2);
     mvhline(y + height - 1, x + 1, ACS_HLINE, width - 2);
@@ -84,6 +77,43 @@ void drawBox(int x, int y, int width, int height) {
     mvaddch(y, x + width - 1, ACS_URCORNER);
     mvaddch(y + height - 1, x, ACS_LLCORNER);
     mvaddch(y + height - 1, x + width - 1, ACS_LRCORNER);
+}
+
+void initGameOverlay() {
+    int x = xMargin;
+    int y = yMargin + mainHeight;
+    cchar_t arrow_up, arrow_down, arrow_left, arrow_right;
+
+    setcchar(&arrow_up, L"\u2191", 0, 0, NULL);
+    setcchar(&arrow_down, L"\u2193", 0, 0, NULL);
+    setcchar(&arrow_left, L"\u2190", 0, 0, NULL);
+    setcchar(&arrow_right, L"\u2192", 0, 0, NULL);
+
+    drawBox(x, y, mainWidth, 7);
+
+    mvprintw(y + 2, x + 3, "quit:    q");
+    mvprintw(y + 4, x + 3, "restart: r");
+    mvprintw(y + 2, x + 15, "score: ");
+
+    mvadd_wch(y + 2, x + mainWidth - 7, &arrow_up);
+    mvadd_wch(y + 3, x + mainWidth - 9, &arrow_left);
+    mvadd_wch(y + 3, x + mainWidth - 5, &arrow_right);
+    mvadd_wch(y + 4, x + mainWidth - 7, &arrow_down);
+}
+
+void clearw(){
+    clear();
+}
+
+void closeInterface() {
+    clear();
+    endwin();
+}
+
+int get_color_pair(int value) {
+    if (value == 0)
+        return 1;
+    return (value <= 65536) ? (__builtin_ctz(value) + 1) : 17;
 }
 
 void drawBoxThick(int x, int y, int width, int height) {
@@ -186,19 +216,6 @@ void animateTiles(int hasMerged[]) {
             drawBoxThick(getXofTile(i), getYofTile(i), tileWidth, tileHeight);
         }
     }
-
-    timeout(170);
-    int ch = getch();
-    timeout(-1);
-
-    if (ch != ERR) {
-        ungetch(ch);
-    }
-    for (int i = 0; i < 16; i++) {
-        if (hasMerged[i]) {
-            drawBox(getXofTile(i), getYofTile(i), tileWidth, tileHeight);
-        }
-    }
 }
 
 int getInput() {
@@ -208,37 +225,85 @@ int getInput() {
         case 'w':
         case 'k':
         case 259:
-            return -4;
-            break;
+            return 0;
         case 's':
         case 'j':
         case 258:
-            return 4;
-            break;
+            return 1;
         case 'a':
         case 'h':
         case 260:
-            return -1;
-            break;
+            return 2;
         case 'd':
         case 'l':
         case 261:
-            return 1;
-            break;
+            return 3;
+        case 'q':
+            return 5;
+        case 'r':
+            return 4;
         }
     }
 }
 
-void refreshTiles(int board[], int hasMerged[]) {
+void interruptedPause(int ms) {
+    timeout(ms);
+    int ch = getch();
+    timeout(-1);
+
+    if (ch != ERR) {
+        ungetch(ch);
+    }
+}
+
+void highlightMenuItem(int item, int color) {
+    int x = xMargin;
+    int y = yMargin + mainHeight;
+    switch (item) {
+    case 0:
+        x += mainWidth - 7;
+        y += 2;
+        break;
+    case 1:
+        x += mainWidth - 7;
+        y += 4;
+        break;
+    case 2:
+        x += mainWidth - 9;
+        y += 3;
+        break;
+    case 3:
+        x += mainWidth - 5;
+        y += 3;
+        break;
+    case 4:
+        x += 12;
+        y += 4;
+        break;
+    }
+    mvchgat(y, x, 1, A_NORMAL, color, NULL);
+}
+
+void refreshOverlay(int score, int inp) {
+    mvprintw(yMargin + mainHeight + 2, xMargin + 22, "%d", score);
+    highlightMenuItem(inp, 18);
+}
+
+void refreshTiles(int board[], int hasMerged[], int score, int inp) {
     drawTiles(board);
     drawNumbers(board);
+
     animateTiles(hasMerged);
+    refreshOverlay(score, inp);
+
     refresh();
+    interruptedPause(170);
     drawTiles(board);
+    highlightMenuItem(inp,1);
     refresh();
 }
 
-void draw_game_over_overlay() {
+void drawGameOverOverlay() {
     const char *ascii_art[] = {" ██████╗  █████╗ ███╗   ███╗███████╗      "
                                "██████╗ ██╗   ██╗███████╗██████╗ ",
                                "██╔════╝ ██╔══██╗████╗ ████║██╔════╝     "
@@ -288,35 +353,4 @@ void draw_game_over_overlay() {
     refresh();
 }
 
-void initGameOverlay() {
-    int x = xMargin;
-    int y = yMargin + mainHeight;
-    cchar_t arrow_up, arrow_down, arrow_left, arrow_right;
-
-    setcchar(&arrow_up, L"\u2191", 0, 0, NULL);
-    setcchar(&arrow_down, L"\u2193", 0, 0, NULL);
-    setcchar(&arrow_left, L"\u2190", 0, 0, NULL);
-    setcchar(&arrow_right, L"\u2192", 0, 0, NULL);
-
-    drawBox(x, y, mainWidth, 5);
-
-    mvprintw(y + 1, x + 2, "quit:    q");
-    mvprintw(y + 3, x + 2, "restart: r");
-    mvprintw(y + 1, x + 15, "score:");
-
-    mvadd_wch(y + 1, x + mainWidth - 5, &arrow_up);
-    mvadd_wch(y + 2, x + mainWidth - 7, &arrow_left);
-    mvadd_wch(y + 2, x + mainWidth - 3, &arrow_right);
-    mvadd_wch(y + 3, x + mainWidth - 5, &arrow_down);
-
-    refresh();
-}
-
-void gameInfoOverlay(int score, int input) {}
-
-void testing() {
-    initGameOverlay();
-    usleep(1000 * 1000);
-    flushinp();
-    getch();
-}
+void gameOver() { drawGameOverOverlay(); }

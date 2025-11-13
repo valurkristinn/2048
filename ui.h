@@ -2,11 +2,12 @@
 #define UI_H
 
 void initInterface();
-void getMargin();
+void initGameOverlay();
 int getInput();
 void closeInterface();
-void testing();
-void refreshTiles(int board[], int hasMerged[]);
-void draw_game_over_overlay();
+void clearw();
+void refreshTiles(int board[], int hasMerged[], int score, int inp);
+void gameOver();
+
 
 #endif
