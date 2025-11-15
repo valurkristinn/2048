@@ -54,6 +54,8 @@ dkms.conf
 # debug information files
 *.dwo
 
+# macOS finder file
+.DS_STORE
 
 # main executable
 2048
