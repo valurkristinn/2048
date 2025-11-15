@@ -6,7 +6,6 @@
 #include <unistd.h>
 #include <wchar.h>
 
-#include "gameLogic.h"
 #include "ui.h"
 
 enum Direction { UP = -4, DOWN = 4, LEFT = -1, RIGHT = 1 };

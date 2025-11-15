@@ -25,7 +25,7 @@ void getEmptyTiles() {
 }
 
 void newTile() {
-    int tileVal = (rand() % 2 + 1) * 2;
+    int tileVal = (rand() % 10) < 9 ? 2 : 4;
     int tileNum = emptyTiles[rand() % count];
     board[tileNum] = tileVal;
 }
@@ -150,6 +150,7 @@ enum Direction intToDir(int i) {
 }
 
 void initGame() {
+    srand(time(NULL));
     board = calloc(16, sizeof(int));
     hasMerged = calloc(16, sizeof(int));
     count = 0;
