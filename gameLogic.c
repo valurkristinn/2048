@@ -29,14 +29,11 @@ int countEmptyTiles(int *board) {
 }
 
 void newTile(int *board) {
-    int *emptyTiles = calloc(16, sizeof(int));
-    if (!emptyTiles)
-        exit(1);
+    int emptyTiles[16];
     int count = getEmptyTiles(board, emptyTiles);
     int tileVal = (rand() % 10) < 9 ? 2 : 4;
     int tileNum = emptyTiles[rand() % count];
     board[tileNum] = tileVal;
-    free(emptyTiles);
 }
 
 int getMoveValidity(int tilenum, enum Direction direction, int *board) {
@@ -129,16 +126,13 @@ int moveAll(enum Direction direction, int *board, int *hasMerged, int *score) {
     return hasMoved;
 }
 
-int isGameOver(int *board) {
-    enum Direction directions[4] = {UP, DOWN, LEFT, RIGHT};
-
-    for (int i = 0; i < 4; i++) {
-        for (int j = i % 2 == 0 ? 0 : 1; j < 4; j += 2) {
-            for (int k = 0; k < 4; k++) {
-                if (getMoveValidity(i * 4 + j, directions[k], board)) {
-                    return 0;
-                }
-            }
+ int isGameOver(int *board) {
+    // checks each tile if it can move down or right, 
+    // checking if there is any valid move
+    for (int i = 0; i < 16; i++) {
+        if (getMoveValidity(i, DOWN, board) ||
+            getMoveValidity(i, RIGHT, board)) {
+            return 0;
         }
     }
     return 1;
@@ -155,7 +149,7 @@ enum Direction intToDir(int i) {
     case 3:
         return RIGHT;
     default:
-        return 0;
+        exit(1);
     }
 }
 
@@ -169,7 +163,7 @@ void startNewGame(int *board, int *hasMerged, int *score) {
 }
 
 int performRound(int inp, int *board, int *hasMerged, int *score) {
-    if (countEmptyTiles(board) == 1 && isGameOver(board)) {
+    if (countEmptyTiles(board) == 0 && isGameOver(board)) {
         return 0;
     }
 

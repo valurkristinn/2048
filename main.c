@@ -7,13 +7,9 @@
 int main() {
     srand(time(NULL));
 
-    int *board = calloc(16, sizeof(int));
-    int *hasMerged = calloc(16, sizeof(int));
+    int board[16];
+    int hasMerged[16];
     int score = 0;
-
-    if (!board || !hasMerged) {
-        exit(1);
-    }
 
     initInterface();
     int inp = 0;
@@ -36,7 +32,5 @@ int main() {
             }
         }
     }
-    free(board);
-    free(hasMerged);
     closeInterface();
 }
