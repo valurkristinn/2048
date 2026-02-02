@@ -2,7 +2,7 @@
 
 A terminal-based version of 2048 written in C.
 
-![Gameplay gif](gameplay.gif)
+![Gameplay gif](gameplay.gif| width=200)
 
 
 ## Playing the game
