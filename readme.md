@@ -7,7 +7,7 @@ A terminal-based version of 2048 written in C.
 
 ## Playing the game
 
-Download from releases or build yourself (ncurses must be installed on your system to build)
+Download from releases or build yourself (ncurses must be installed with brew to build)
 
 ```bash
 make
